@@ -3,6 +3,9 @@ package edu.usc.cs.mach.backend.service;
 import edu.usc.cs.mach.backend.dto.AttributeSetting;
 import edu.usc.cs.mach.backend.entity.ExcelFileWatchConfiguration;
 import edu.usc.cs.mach.backend.entity.MachSyncJob;
+import org.apache.poi.ss.format.CellFormatType;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -38,8 +41,21 @@ public class ExcelTransformService {
                 //treat as string value
                 attributeSetting.setCaptionName(row.getCell(0).toString());
                 attributeSetting.setAttributeName(row.getCell(1).toString());
-                attributeSetting.setAttributeValue(row.getCell(2).toString());
+
+                XSSFCell formulaCell = row.getCell(2);
+
+                if (formulaCell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+                    try {
+                        attributeSetting.setAttributeValue(formulaCell.getNumericCellValue() + "");
+                    } catch (Exception e) {
+                        attributeSetting.setAttributeValue(formulaCell.getStringCellValue());
+                    }
+                } else {
+                    attributeSetting.setAttributeValue(formulaCell.toString());
+                }
+
                 settings.add(attributeSetting);
+                System.out.printf("Row %d, read attr: %s, %s, %s\n", row.getRowNum(), attributeSetting.getCaptionName(), attributeSetting.getAttributeName(), attributeSetting.getAttributeValue());
             }
         }
         return settings;

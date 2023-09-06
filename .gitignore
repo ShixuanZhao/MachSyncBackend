@@ -40,3 +40,7 @@ out/
 *.html
 *.svg
 *.css
+
+gradlew
+gradlew.bat
+gradle/
